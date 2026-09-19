@@ -56,10 +56,16 @@ describe("evaluatePunchOutWindow", () => {
 });
 
 describe("isLate / duration", () => {
-  it("marks arrival more than a minute after start as late", () => {
+  it("honours a one-minute grace", () => {
     const start = new Date("2026-09-13T08:00:00+05:30");
-    assert.equal(isLate(new Date("2026-09-13T08:04:00+05:30"), start), true);
-    assert.equal(isLate(new Date("2026-09-13T08:00:30+05:30"), start), false);
+    assert.equal(isLate(new Date("2026-09-13T08:04:00+05:30"), start, 1), true);
+    assert.equal(isLate(new Date("2026-09-13T08:00:30+05:30"), start, 1), false);
+  });
+
+  it("uses a ten-minute grace by default", () => {
+    const start = new Date("2026-09-13T08:00:00+05:30");
+    assert.equal(isLate(new Date("2026-09-13T08:08:00+05:30"), start), false);
+    assert.equal(isLate(new Date("2026-09-13T08:11:00+05:30"), start), true);
   });
 
   it("formats duration in whole seconds", () => {

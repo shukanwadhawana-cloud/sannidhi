@@ -99,6 +99,77 @@ export type PunchFail = {
 
 export type PunchResult = PunchOk | PunchFail;
 
+export type OrgPolicy = {
+  graceMinutes: number;
+};
+
+export type RequestType = "regularize" | "not_attending" | "leave";
+export type RequestStatus = "pending" | "approved" | "rejected" | "cancelled";
+
+export type AttendanceRequest = {
+  id: string;
+  organizationId: string;
+  userId: string;
+  userName?: string;
+  sessionId: string | null;
+  sessionName?: string | null;
+  locationName?: string | null;
+  dayDate: string;
+  requestType: RequestType;
+  status: RequestStatus;
+  requestedPunchIn: string | null;
+  requestedPunchOut: string | null;
+  reason: string;
+  reviewerUserId: string | null;
+  reviewerName?: string | null;
+  reviewerNote: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+};
+
+export type CalendarDay = {
+  date: string;
+  inMonth: boolean;
+  mark: "none" | "open" | "present" | "leave" | "not_attending" | "absent";
+  sessionCount: number;
+  present: boolean;
+};
+
+export type MonthDesk = {
+  year: number;
+  month: number;
+  days: CalendarDay[];
+  summary: {
+    presentDays: number;
+    leaveDays: number;
+    absentDays: number;
+    sabhaDays: number;
+  };
+};
+
+export type TeamMember = {
+  profile: Profile;
+  status: "present" | "completed" | "leave" | "not_in" | "exception";
+  punchInTime: string | null;
+  punchOutTime: string | null;
+  durationSeconds: number | null;
+  isLate: boolean;
+  hasLocationException: boolean;
+};
+
+export type TeamRoster = {
+  session: SabhaSession | null;
+  members: TeamMember[];
+  counts: {
+    present: number;
+    completed: number;
+    leave: number;
+    notIn: number;
+    exceptions: number;
+    total: number;
+  };
+};
+
 export type HomeData = {
   profile: Profile;
   session: SabhaSession | null;
@@ -107,6 +178,13 @@ export type HomeData = {
   stats: {
     presentCount: number;
     totalSessions: number;
+  };
+  policy: OrgPolicy;
+  pendingRequestCount: number;
+  month: {
+    presentDays: number;
+    leaveDays: number;
+    sabhaDays: number;
   };
 };
 
@@ -118,6 +196,9 @@ export type AdminOverview = {
   currentlyPresent: number;
   locationExceptions: number;
   lateArrivals: number;
+  pendingApprovals: number;
+  onLeaveToday: number;
+  memberCount: number;
   sessions: Array<{
     session: SabhaSession;
     present: number;
@@ -125,6 +206,7 @@ export type AdminOverview = {
     exceptions: number;
   }>;
 };
+
 
 export type PlaceHit = {
   label: string;

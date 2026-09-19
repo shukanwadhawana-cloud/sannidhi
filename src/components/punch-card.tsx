@@ -1,12 +1,13 @@
-import { Check, MapPin, Radio } from "lucide-react";
+import { MapPin, Radio } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { PunchClock } from "@/components/punch-clock";
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
-import { formatDateLong, formatDuration, formatMeters, formatTime } from "@/lib/format";
+import { formatDateLong, formatTime } from "@/lib/format";
 import { humanGeoError, readLocation } from "@/lib/geolocation";
 import { punchIn, punchOut } from "@/lib/server/punch";
-import type { AttendanceRecord, HomeData, PunchResult } from "@/lib/types";
+import type { HomeData, PunchResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type LocState =
@@ -42,22 +43,6 @@ export function PunchCard({
       window.removeEventListener("offline", off);
     };
   }, []);
-
-  if (!session) {
-    return (
-      <Card className="p-6">
-        <p className="text-sm font-medium text-muted-foreground">Today’s Sabha</p>
-        <h2 className="mt-2 font-display text-2xl font-semibold">No active Sabha right now</h2>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          There is no active Sabha attendance session right now. When a coordinator opens a
-          session, punch-in will appear here.
-        </p>
-      </Card>
-    );
-  }
-
-  const checkedIn = attendance?.status === "active";
-  const completed = attendance?.status === "completed";
 
   async function runPunch(action: "in" | "out", forceException = false) {
     if (!session) return;
@@ -133,19 +118,43 @@ export function PunchCard({
 
   return (
     <Card className="overflow-hidden p-6">
-      <p className="text-sm font-medium text-muted-foreground">Today’s Sabha</p>
-      <h2 className="mt-1 font-display text-3xl font-semibold leading-tight">{session.name}</h2>
-      <p className="mt-2 text-sm text-muted-foreground">{formatDateLong(session.sessionDate)}</p>
-      <p className="text-sm text-muted-foreground">
-        {formatTime(session.scheduledStart)} – {formatTime(session.scheduledEnd)}
-      </p>
-      <p className="mt-3 flex items-start gap-2 text-sm text-foreground">
-        <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-        <span>
-          {session.locationName}
-          {session.locationAddress ? ` · ${session.locationAddress}` : ""}
-        </span>
-      </p>
+      <PunchClock
+        session={session}
+        attendance={attendance}
+        busy={busy}
+        online={online}
+        onPunch={(action) => void runPunch(action)}
+      />
+
+      {session ? (
+        <div className="mt-6 border-t border-border pt-5">
+          <p className="text-sm font-medium text-muted-foreground">Today’s Sabha</p>
+          <h2 className="mt-1 font-display text-2xl font-semibold leading-tight">{session.name}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{formatDateLong(session.sessionDate)}</p>
+          <p className="text-sm text-muted-foreground">
+            {formatTime(session.scheduledStart)} – {formatTime(session.scheduledEnd)}
+          </p>
+          <p className="mt-3 flex items-start gap-2 text-sm text-foreground">
+            <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
+            <span>
+              {session.locationName}
+              {session.locationAddress ? ` · ${session.locationAddress}` : ""}
+            </span>
+          </p>
+          {data.policy.graceMinutes > 0 ? (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Arrival grace {data.policy.graceMinutes} minutes after start.
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <div className="mt-6 border-t border-border pt-5">
+          <h2 className="font-display text-xl font-semibold">No active Sabha right now</h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            When a coordinator opens a session, tap the clock to punch in.
+          </p>
+        </div>
+      )}
 
       <div
         className={cn(
@@ -175,26 +184,11 @@ export function PunchCard({
         </p>
       ) : null}
 
-      <div className="mt-6">
-        {completed && attendance ? (
-          <CompletedState attendance={attendance} />
-        ) : checkedIn && attendance ? (
-          <CheckedInState
-            attendance={attendance}
-            busy={busy}
-            onPunchOut={() => void runPunch("out")}
-          />
-        ) : (
-          <Button
-            size="punch"
-            disabled={busy || !online}
-            onClick={() => void runPunch("in")}
-            aria-label="Punch in"
-          >
-            {busy ? "Checking in…" : "Punch in"}
-          </Button>
-        )}
-      </div>
+      {attendance?.hasLocationException ? (
+        <div className="mt-3">
+          <Badge tone="warn">Location exception</Badge>
+        </div>
+      ) : null}
 
       {offerException ? (
         <div className="mt-4 rounded-lg border border-border bg-secondary/50 p-4">
@@ -213,95 +207,5 @@ export function PunchCard({
         </div>
       ) : null}
     </Card>
-  );
-}
-
-function CheckedInState({
-  attendance,
-  busy,
-  onPunchOut,
-}: {
-  attendance: AttendanceRecord;
-  busy: boolean;
-  onPunchOut: () => void;
-}) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 text-primary">
-        <span className="grid size-8 place-items-center rounded-full bg-primary/12">
-          <Check className="size-4" strokeWidth={2.5} />
-        </span>
-        <span className="text-lg font-semibold">Checked in</span>
-      </div>
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <dt className="text-muted-foreground">Entry</dt>
-          <dd className="font-medium tabular-nums">{formatTime(attendance.punchInTime)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Status</dt>
-          <dd>
-            <Badge tone="ok">Attending</Badge>
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Distance</dt>
-          <dd className="tabular-nums">{formatMeters(attendance.punchInDistance)}</dd>
-        </div>
-        {attendance.hasLocationException ? (
-          <div>
-            <dt className="text-muted-foreground">Location</dt>
-            <dd>
-              <Badge tone="warn">Exception</Badge>
-            </dd>
-          </div>
-        ) : null}
-      </dl>
-      <Button
-        className="mt-5"
-        size="punch"
-        variant="outline"
-        disabled={busy}
-        onClick={onPunchOut}
-        aria-label="Punch out"
-      >
-        {busy ? "Recording…" : "Punch out"}
-      </Button>
-    </div>
-  );
-}
-
-function CompletedState({ attendance }: { attendance: AttendanceRecord }) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 text-primary">
-        <span className="grid size-8 place-items-center rounded-full bg-primary/12">
-          <Check className="size-4" strokeWidth={2.5} />
-        </span>
-        <span className="text-lg font-semibold">Attendance completed</span>
-      </div>
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <dt className="text-muted-foreground">Entry</dt>
-          <dd className="font-medium tabular-nums">{formatTime(attendance.punchInTime)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Exit</dt>
-          <dd className="font-medium tabular-nums">{formatTime(attendance.punchOutTime)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Duration</dt>
-          <dd className="font-medium tabular-nums">{formatDuration(attendance.durationSeconds)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Status</dt>
-          <dd>
-            <Badge tone={attendance.hasLocationException ? "warn" : "ok"}>
-              {attendance.hasLocationException ? "Exception" : "Present"}
-            </Badge>
-          </dd>
-        </div>
-      </dl>
-    </div>
   );
 }

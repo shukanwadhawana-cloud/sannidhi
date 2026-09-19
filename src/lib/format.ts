@@ -101,6 +101,62 @@ export function firstName(full: string | null | undefined): string {
   return part || "there";
 }
 
+export function formatClockParts(now = new Date(), timeZone = DEFAULT_TIMEZONE) {
+  const parts = new Intl.DateTimeFormat("en-IN", {
+    timeZone,
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  }).formatToParts(now);
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? "";
+  const dayPeriod = (get("dayPeriod") || "AM").replace(/\./g, "").toUpperCase();
+  return {
+    weekday: get("weekday"),
+    day: get("day"),
+    month: get("month"),
+    year: get("year"),
+    hour: get("hour"),
+    minute: get("minute"),
+    second: get("second"),
+    dayPeriod,
+    dateLabel: `${get("weekday")}, ${get("day")} ${get("month")} ${get("year")}`,
+  };
+}
+
+export function requestTypeLabel(type: string): string {
+  switch (type) {
+    case "regularize":
+      return "Regularize";
+    case "not_attending":
+      return "Not attending";
+    case "leave":
+      return "Leave";
+    default:
+      return type;
+  }
+}
+
+export function requestStatusLabel(status: string): string {
+  switch (status) {
+    case "pending":
+      return "Pending";
+    case "approved":
+      return "Approved";
+    case "rejected":
+      return "Declined";
+    case "cancelled":
+      return "Withdrawn";
+    default:
+      return status;
+  }
+}
+
 export function formatMeters(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
   if (n < 10) return `${n.toFixed(1)} m`;
@@ -120,7 +176,7 @@ export function roleLabel(role: string): string {
   }
 }
 
-export function isoToIstInput(iso: string | null | undefined): { date: string; time: string } {
+export function isoToIstInput(iso?: string | null): { date: string; time: string } {
   if (!iso) return { date: ymdInZone(), time: "08:00" };
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return { date: ymdInZone(), time: "08:00" };

@@ -77,6 +77,19 @@ export const getAdminOverview = createServerFn({ method: "GET" })
         and r.status <> 'cancelled'
     `;
 
+    const extras = await sql<{ pending: number; on_leave: number; members: number }>`
+      select
+        (select count(*)::int from attendance_requests q
+          where q.organization_id = ${profile.organizationId} and q.status = 'pending') as pending,
+        (select count(*)::int from attendance_requests q
+          where q.organization_id = ${profile.organizationId}
+            and q.status = 'approved'
+            and q.request_type in ('leave', 'not_attending')
+            and q.day_date = (now() at time zone 'Asia/Kolkata')::date) as on_leave,
+        (select count(*)::int from profiles p
+          where p.organization_id = ${profile.organizationId} and p.status = 'active') as members
+    `;
+
     return {
       profile,
       todaySessions: sessions.length,
@@ -85,6 +98,9 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       currentlyPresent: today[0]?.present ?? 0,
       locationExceptions: today[0]?.exceptions ?? 0,
       lateArrivals: today[0]?.late ?? 0,
+      pendingApprovals: extras[0]?.pending ?? 0,
+      onLeaveToday: extras[0]?.on_leave ?? 0,
+      memberCount: extras[0]?.members ?? 0,
       sessions: sessions.map((session) => ({
         session,
         present: counts[session.id]?.present ?? 0,

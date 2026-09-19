@@ -11,9 +11,11 @@ import {
   isLate,
   type SessionWindow,
 } from "@/lib/punch-rules";
+import { ymdInZone } from "@/lib/format";
 import { assertActive } from "@/lib/roles";
 import type { AttendanceRecord, HomeData, PunchResult, SabhaSession } from "@/lib/types";
 import { mapAttendance, mapSession } from "./map";
+import { loadOrgPolicy } from "./policy";
 import { ensureProfile } from "./profile";
 
 type Sql = Awaited<ReturnType<typeof getSql>>;
@@ -128,6 +130,35 @@ export const getHomeData = createServerFn({ method: "GET" })
       from attendance_records r
       where r.user_id = ${profile.userId} and r.status in ('active', 'completed')
     `;
+    const policy = await loadOrgPolicy(sql, profile.organizationId);
+    const pendingRows = await sql<{ c: number }>`
+      select count(*)::int as c from attendance_requests
+      where user_id = ${profile.userId} and status = 'pending'
+    `;
+    const monthPrefix = ymdInZone().slice(0, 7);
+    const monthPresent = await sql<{ c: number }>`
+      select count(distinct s.session_date)::int as c
+      from attendance_records r
+      join sabha_sessions s on s.id = r.session_id
+      where r.user_id = ${profile.userId}
+        and r.status in ('active', 'completed')
+        and to_char(s.session_date, 'YYYY-MM') = ${monthPrefix}
+    `;
+    const monthLeave = await sql<{ c: number }>`
+      select count(distinct day_date)::int as c
+      from attendance_requests
+      where user_id = ${profile.userId}
+        and status = 'approved'
+        and request_type in ('leave', 'not_attending')
+        and to_char(day_date, 'YYYY-MM') = ${monthPrefix}
+    `;
+    const monthSabha = await sql<{ c: number }>`
+      select count(distinct session_date)::int as c
+      from sabha_sessions
+      where organization_id = ${profile.organizationId}
+        and status <> 'cancelled'
+        and to_char(session_date, 'YYYY-MM') = ${monthPrefix}
+    `;
     return {
       profile,
       session,
@@ -136,6 +167,13 @@ export const getHomeData = createServerFn({ method: "GET" })
       stats: {
         presentCount: statsRows[0]?.present ?? 0,
         totalSessions: statsRows[0]?.total ?? 0,
+      },
+      policy,
+      pendingRequestCount: pendingRows[0]?.c ?? 0,
+      month: {
+        presentDays: monthPresent[0]?.c ?? 0,
+        leaveDays: monthLeave[0]?.c ?? 0,
+        sabhaDays: monthSabha[0]?.c ?? 0,
       },
     };
   });
@@ -201,7 +239,8 @@ export const punchIn = createServerFn({ method: "POST" })
     }
 
     const id = crypto.randomUUID();
-    const late = isLate(new Date(), new Date(session.scheduledStart));
+    const policy = await loadOrgPolicy(sql, profile.organizationId);
+    const late = isLate(new Date(), new Date(session.scheduledStart), policy.graceMinutes);
     const exception = fence.isException;
 
     try {

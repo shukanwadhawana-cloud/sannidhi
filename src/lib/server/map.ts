@@ -1,6 +1,14 @@
 import type { Role } from "@/lib/constants";
 import { asBool, asIso, asNumber } from "@/lib/format";
-import type { AttendanceRecord, Profile, SabhaLocation, SabhaSession } from "@/lib/types";
+import type {
+  AttendanceRecord,
+  AttendanceRequest,
+  Profile,
+  RequestStatus,
+  RequestType,
+  SabhaLocation,
+  SabhaSession,
+} from "@/lib/types";
 
 export function mapProfile(row: Record<string, unknown>): Profile {
   return {
@@ -75,6 +83,29 @@ export function mapAttendance(row: Record<string, unknown>): AttendanceRecord {
     sessionName: row.session_name ? String(row.session_name) : undefined,
     locationName: row.location_name ? String(row.location_name) : undefined,
     sessionDate: row.session_date ? String(row.session_date).slice(0, 10) : undefined,
+  };
+}
+
+export function mapRequest(row: Record<string, unknown>): AttendanceRequest {
+  return {
+    id: String(row.id),
+    organizationId: String(row.organization_id),
+    userId: String(row.user_id),
+    userName: row.full_name ? String(row.full_name) : row.user_name ? String(row.user_name) : undefined,
+    sessionId: row.session_id ? String(row.session_id) : null,
+    sessionName: row.session_name ? String(row.session_name) : null,
+    locationName: row.location_name ? String(row.location_name) : null,
+    dayDate: String(row.day_date).slice(0, 10),
+    requestType: String(row.request_type) as RequestType,
+    status: String(row.status) as RequestStatus,
+    requestedPunchIn: asIso(row.requested_punch_in),
+    requestedPunchOut: asIso(row.requested_punch_out),
+    reason: String(row.reason ?? ""),
+    reviewerUserId: row.reviewer_user_id ? String(row.reviewer_user_id) : null,
+    reviewerName: row.reviewer_name ? String(row.reviewer_name) : null,
+    reviewerNote: row.reviewer_note ? String(row.reviewer_note) : null,
+    reviewedAt: asIso(row.reviewed_at),
+    createdAt: asIso(row.created_at) ?? new Date().toISOString(),
   };
 }
 

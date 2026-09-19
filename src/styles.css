@@ -91,3 +91,37 @@
   font-size: 10px;
   background: color-mix(in oklab, var(--color-card) 88%, transparent);
 }
+
+.punch-clock-face {
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--color-border) 90%, transparent),
+    0 16px 36px color-mix(in oklab, var(--color-ink) 10%, transparent);
+  transition: box-shadow 200ms ease;
+}
+
+.punch-clock-face[data-state="in"] {
+  animation: punch-breathe 2.8s ease-in-out infinite;
+}
+
+.punch-clock-face:enabled:hover {
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--color-primary) 35%, transparent),
+    0 18px 40px color-mix(in oklab, var(--color-ink) 12%, transparent);
+}
+
+.punch-clock-face:enabled:active {
+  transform: scale(0.98);
+}
+
+@keyframes punch-breathe {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--color-primary) 28%, transparent),
+      0 16px 36px color-mix(in oklab, var(--color-ink) 10%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 8px color-mix(in oklab, var(--color-primary) 10%, transparent),
+      0 16px 36px color-mix(in oklab, var(--color-ink) 10%, transparent);
+  }
+}

@@ -41,8 +41,9 @@ export function evaluatePunchOutWindow(
   return "ok";
 }
 
-export function isLate(punchIn: Date, scheduledStart: Date): boolean {
-  return punchIn.getTime() > scheduledStart.getTime() + 60_000;
+export function isLate(punchIn: Date, scheduledStart: Date, graceMinutes = 10): boolean {
+  const grace = Number.isFinite(graceMinutes) ? Math.max(0, graceMinutes) : 10;
+  return punchIn.getTime() > scheduledStart.getTime() + grace * 60_000;
 }
 
 export function durationSeconds(start: Date, end: Date): number {

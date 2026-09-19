@@ -3,12 +3,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { BrandedSplash } from "@/components/branded-splash";
+import { MonthCalendar } from "@/components/month-calendar";
 import { Badge, Card } from "@/components/ui/card";
 import { Select } from "@/components/ui/input";
 import { RedirectToSignIn } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { formatDate, formatDuration, formatTime } from "@/lib/format";
+import { shiftMonth } from "@/lib/calendar";
+import { formatDate, formatDuration, formatTime, ymdInZone } from "@/lib/format";
 import { listMyHistory } from "@/lib/server/attendance";
+import { getMonthDesk } from "@/lib/server/desk";
 import { getMyProfile } from "@/lib/server/profile";
 
 export const Route = createFileRoute("/history")({ component: HistoryPage });
@@ -16,9 +19,19 @@ export const Route = createFileRoute("/history")({ component: HistoryPage });
 function HistoryPage() {
   const { user, isPending } = useCurrentUserState();
   const [status, setStatus] = useState("all");
+  const today = ymdInZone();
+  const [cursor, setCursor] = useState(() => ({
+    year: Number(today.slice(0, 4)),
+    month: Number(today.slice(5, 7)),
+  }));
   const profile = useQuery({
     queryKey: ["profile"],
     queryFn: () => getMyProfile(),
+    enabled: Boolean(user),
+  });
+  const desk = useQuery({
+    queryKey: ["month-desk", cursor.year, cursor.month],
+    queryFn: () => getMonthDesk({ data: cursor }),
     enabled: Boolean(user),
   });
   const history = useQuery({
@@ -33,8 +46,27 @@ function HistoryPage() {
   return (
     <AppShell profile={profile.data}>
       <h1 className="font-display text-3xl font-semibold">Attendance history</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Your recorded Sabha visits.</p>
-      <div className="mt-4 max-w-xs">
+      <p className="mt-1 text-sm text-muted-foreground">Calendar of your Sabha visits, leave, and missed days.</p>
+
+      <Card className="mt-5 p-4">
+        {desk.data ? (
+          <MonthCalendar
+            desk={desk.data}
+            busy={desk.isFetching}
+            onShift={(delta) => setCursor((c) => shiftMonth(c.year, c.month, delta))}
+          />
+        ) : (
+          <div className="h-64 animate-pulse rounded-lg bg-secondary" />
+        )}
+        {desk.data ? (
+          <p className="mt-4 text-sm text-muted-foreground">
+            {desk.data.summary.presentDays} present · {desk.data.summary.leaveDays} leave ·{" "}
+            {desk.data.summary.absentDays} absent · {desk.data.summary.sabhaDays} Sabha days
+          </p>
+        ) : null}
+      </Card>
+
+      <div className="mt-6 max-w-xs">
         <Select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Filter status">
           <option value="all">All</option>
           <option value="completed">Completed</option>

@@ -11,14 +11,21 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as HistoryRouteImport } from './routes/history'
+import { Route as LeaveRouteImport } from './routes/leave'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as MoreRouteImport } from './routes/more'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RegularizeRouteImport } from './routes/regularize'
+import { Route as TeamRouteImport } from './routes/team'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminApprovalsRouteImport } from './routes/admin/approvals'
 import { Route as AdminAuditRouteImport } from './routes/admin/audit'
 import { Route as AdminLocationsRouteImport } from './routes/admin/locations'
 import { Route as AdminPeopleRouteImport } from './routes/admin/people'
+import { Route as AdminPolicyRouteImport } from './routes/admin/policy'
 import { Route as AdminReportsRouteImport } from './routes/admin/reports'
 import { Route as AdminSessionsRouteImport } from './routes/admin/sessions'
 import { Route as AdminSessionsIdRouteImport } from './routes/admin/sessions.$id'
@@ -34,14 +41,29 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HistoryRoute = HistoryRouteImport.update({
   id: '/history',
   path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LeaveRoute = LeaveRouteImport.update({
+  id: '/leave',
+  path: '/leave',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoreRoute = MoreRouteImport.update({
+  id: '/more',
+  path: '/more',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -54,9 +76,24 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegularizeRoute = RegularizeRouteImport.update({
+  id: '/regularize',
+  path: '/regularize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAuditRoute = AdminAuditRouteImport.update({
@@ -72,6 +109,11 @@ const AdminLocationsRoute = AdminLocationsRouteImport.update({
 const AdminPeopleRoute = AdminPeopleRouteImport.update({
   id: '/people',
   path: '/people',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPolicyRoute = AdminPolicyRouteImport.update({
+  id: '/policy',
+  path: '/policy',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminReportsRoute = AdminReportsRouteImport.update({
@@ -98,13 +140,20 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/help': typeof HelpRoute
   '/history': typeof HistoryRoute
+  '/leave': typeof LeaveRoute
   '/login': typeof LoginRoute
+  '/more': typeof MoreRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/regularize': typeof RegularizeRoute
+  '/team': typeof TeamRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/locations': typeof AdminLocationsRoute
   '/admin/people': typeof AdminPeopleRoute
+  '/admin/policy': typeof AdminPolicyRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/sessions': typeof AdminSessionsRouteWithChildren
   '/admin/': typeof AdminIndexRoute
@@ -113,13 +162,20 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/help': typeof HelpRoute
   '/history': typeof HistoryRoute
+  '/leave': typeof LeaveRoute
   '/login': typeof LoginRoute
+  '/more': typeof MoreRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/regularize': typeof RegularizeRoute
+  '/team': typeof TeamRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/locations': typeof AdminLocationsRoute
   '/admin/people': typeof AdminPeopleRoute
+  '/admin/policy': typeof AdminPolicyRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/sessions': typeof AdminSessionsRouteWithChildren
   '/admin': typeof AdminIndexRoute
@@ -130,13 +186,20 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/help': typeof HelpRoute
   '/history': typeof HistoryRoute
+  '/leave': typeof LeaveRoute
   '/login': typeof LoginRoute
+  '/more': typeof MoreRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/regularize': typeof RegularizeRoute
+  '/team': typeof TeamRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/locations': typeof AdminLocationsRoute
   '/admin/people': typeof AdminPeopleRoute
+  '/admin/policy': typeof AdminPolicyRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/sessions': typeof AdminSessionsRouteWithChildren
   '/admin/': typeof AdminIndexRoute
@@ -148,13 +211,20 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/help'
     | '/history'
+    | '/leave'
     | '/login'
+    | '/more'
     | '/privacy'
     | '/profile'
+    | '/regularize'
+    | '/team'
+    | '/admin/approvals'
     | '/admin/audit'
     | '/admin/locations'
     | '/admin/people'
+    | '/admin/policy'
     | '/admin/reports'
     | '/admin/sessions'
     | '/admin/'
@@ -163,13 +233,20 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/help'
     | '/history'
+    | '/leave'
     | '/login'
+    | '/more'
     | '/privacy'
     | '/profile'
+    | '/regularize'
+    | '/team'
+    | '/admin/approvals'
     | '/admin/audit'
     | '/admin/locations'
     | '/admin/people'
+    | '/admin/policy'
     | '/admin/reports'
     | '/admin/sessions'
     | '/admin'
@@ -179,13 +256,20 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/help'
     | '/history'
+    | '/leave'
     | '/login'
+    | '/more'
     | '/privacy'
     | '/profile'
+    | '/regularize'
+    | '/team'
+    | '/admin/approvals'
     | '/admin/audit'
     | '/admin/locations'
     | '/admin/people'
+    | '/admin/policy'
     | '/admin/reports'
     | '/admin/sessions'
     | '/admin/'
@@ -196,10 +280,15 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  HelpRoute: typeof HelpRoute
   HistoryRoute: typeof HistoryRoute
+  LeaveRoute: typeof LeaveRoute
   LoginRoute: typeof LoginRoute
+  MoreRoute: typeof MoreRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
+  RegularizeRoute: typeof RegularizeRoute
+  TeamRoute: typeof TeamRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -219,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/history': {
       id: '/history'
       path: '/history'
@@ -226,11 +322,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/leave': {
+      id: '/leave'
+      path: '/leave'
+      fullPath: '/leave'
+      preLoaderRoute: typeof LeaveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/more': {
+      id: '/more'
+      path: '/more'
+      fullPath: '/more'
+      preLoaderRoute: typeof MoreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -247,11 +357,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/regularize': {
+      id: '/regularize'
+      path: '/regularize'
+      fullPath: '/regularize'
+      preLoaderRoute: typeof RegularizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/approvals': {
+      id: '/admin/approvals'
+      path: '/approvals'
+      fullPath: '/admin/approvals'
+      preLoaderRoute: typeof AdminApprovalsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/audit': {
@@ -273,6 +404,13 @@ declare module '@tanstack/react-router' {
       path: '/people'
       fullPath: '/admin/people'
       preLoaderRoute: typeof AdminPeopleRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/policy': {
+      id: '/admin/policy'
+      path: '/policy'
+      fullPath: '/admin/policy'
+      preLoaderRoute: typeof AdminPolicyRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/reports': {
@@ -319,18 +457,22 @@ const AdminSessionsRouteWithChildren = AdminSessionsRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminAuditRoute: typeof AdminAuditRoute
   AdminLocationsRoute: typeof AdminLocationsRoute
   AdminPeopleRoute: typeof AdminPeopleRoute
+  AdminPolicyRoute: typeof AdminPolicyRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSessionsRoute: typeof AdminSessionsRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminApprovalsRoute: AdminApprovalsRoute,
   AdminAuditRoute: AdminAuditRoute,
   AdminLocationsRoute: AdminLocationsRoute,
   AdminPeopleRoute: AdminPeopleRoute,
+  AdminPolicyRoute: AdminPolicyRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminSessionsRoute: AdminSessionsRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
@@ -341,10 +483,15 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  HelpRoute: HelpRoute,
   HistoryRoute: HistoryRoute,
+  LeaveRoute: LeaveRoute,
   LoginRoute: LoginRoute,
+  MoreRoute: MoreRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
+  RegularizeRoute: RegularizeRoute,
+  TeamRoute: TeamRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

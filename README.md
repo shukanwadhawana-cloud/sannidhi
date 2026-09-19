@@ -4,22 +4,27 @@ A free Progressive Web App for Sabha / Satsang attendance.
 
 Open the app, see today’s Sabha, punch in. That’s the whole satsangi experience.
 
-Sannidhi is **not** an HR product. It is a standalone attendance book for gatherings: one current session, a large punch button, and a backend that verifies location instead of trusting a tap.
+Sannidhi is **not** an HR product. It is a standalone attendance book for gatherings, with a PeopleStrong-like punch clock: live IST time, geofenced punch-in, a month calendar, regularization, leave, and a coordinator team roster.
 
 ## What it does
 
 **Satsangis**
 
 - Sign in with email, Google, or X
-- See the active Sabha, hall, and time
-- Punch in / punch out with browser geolocation
+- Punch in / out on a live circular clock (server time, hall geofence)
+- See a month calendar of present / leave / missed days
+- Request regularization if they forgot a punch
+- Mark leave or “not attending” a Sabha
 - Review their own history
 
 **Coordinators and administrators**
 
+- Live **My Team** roster (who is in the hall)
+- KPI desk: present now, exceptions, leave, pending approvals
+- Approve regularization and leave
+- Set arrival grace minutes
 - Create halls with a map pin and an allowed radius (50–1000 m)
 - Create sessions with a punch-in window
-- Watch live attendance
 - Correct forgotten punches with a required reason
 - Export CSV
 - Read an audit log of administrative changes

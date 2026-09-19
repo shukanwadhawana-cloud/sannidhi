@@ -4,7 +4,6 @@ import {
   DEFAULT_CENTRE_ID,
   DEFAULT_LOCATION_ID,
   DEFAULT_ORG_ID,
-  DEFAULT_TIMEZONE,
 } from "@/lib/constants";
 import { getSql } from "@/lib/db";
 import { weekdayName, ymdInZone } from "@/lib/format";
@@ -18,30 +17,6 @@ async function loadAuthUser(sql: Sql, userId: string) {
     select name, email from "user" where id = ${userId} limit 1
   `;
   return rows[0] ?? { name: "Satsangi", email: "" };
-}
-
-function istParts(now = new Date()) {
-  const date = ymdInZone(now, DEFAULT_TIMEZONE);
-  const hour = Number(
-    new Intl.DateTimeFormat("en-GB", {
-      timeZone: DEFAULT_TIMEZONE,
-      hour: "numeric",
-      hour12: false,
-    }).format(now),
-  );
-  const minute = Number(
-    new Intl.DateTimeFormat("en-GB", {
-      timeZone: DEFAULT_TIMEZONE,
-      minute: "numeric",
-    }).format(now),
-  );
-  return { date, hour, minute };
-}
-
-function isoInIst(date: string, hour: number, minute: number): string {
-  const hh = String(Math.max(0, Math.min(23, hour))).padStart(2, "0");
-  const mm = String(Math.max(0, Math.min(59, minute))).padStart(2, "0");
-  return `${date}T${hh}:${mm}:00+05:30`;
 }
 
 async function ensureOpenDemoSession(sql: Sql, createdBy: string): Promise<void> {
@@ -61,9 +36,11 @@ async function ensureOpenDemoSession(sql: Sql, createdBy: string): Promise<void>
   `;
   if (loc.length === 0) return;
 
-  const { date, hour } = istParts();
-  const startHour = Math.max(6, hour - 1);
-  const endHour = Math.min(22, Math.max(startHour + 4, hour + 3));
+  const date = ymdInZone();
+  const now = new Date();
+  const start = new Date(now.getTime() - 20 * 60_000);
+  const end = new Date(now.getTime() + 4 * 60 * 60_000);
+  const punchOpen = new Date(now.getTime() - 60 * 60_000);
   const name = `${weekdayName()} Sabha`;
   await sql`
     insert into sabha_sessions (
@@ -76,10 +53,10 @@ async function ensureOpenDemoSession(sql: Sql, createdBy: string): Promise<void>
       ${DEFAULT_LOCATION_ID},
       ${name},
       ${date},
-      ${isoInIst(date, startHour, 0)},
-      ${isoInIst(date, endHour, 0)},
-      ${isoInIst(date, Math.max(5, startHour - 1), 30)},
-      ${isoInIst(date, endHour, 0)},
+      ${start.toISOString()},
+      ${end.toISOString()},
+      ${punchOpen.toISOString()},
+      ${end.toISOString()},
       'open',
       true,
       true,

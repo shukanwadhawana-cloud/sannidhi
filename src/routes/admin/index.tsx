@@ -13,18 +13,29 @@ function AdminHome() {
     refetchInterval: 8_000,
   });
   const d = overview.data;
+  const presentPct =
+    d && d.memberCount > 0
+      ? Math.round(((d.currentlyPresent + d.checkedOut) / d.memberCount) * 100)
+      : null;
 
   return (
     <div>
       <p className="text-sm font-medium text-muted-foreground">Today</p>
       <h1 className="mt-1 font-display text-3xl font-semibold">Sabha desk</h1>
-      <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3">
-        <Stat label="Sabha sessions" value={d?.todaySessions ?? "—"} />
+      <p className="mt-1 text-sm text-muted-foreground">
+        Live census of who is in the hall — the operational desk, not a medical queue.
+      </p>
+      <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Stat label="In hall now" value={d?.currentlyPresent ?? "—"} accent />
         <Stat label="Checked in" value={d?.checkedIn ?? "—"} />
         <Stat label="Checked out" value={d?.checkedOut ?? "—"} />
-        <Stat label="Currently present" value={d?.currentlyPresent ?? "—"} />
-        <Stat label="Location exceptions" value={d?.locationExceptions ?? "—"} />
+        <Stat label="Present %" value={presentPct == null ? "—" : `${presentPct}%`} />
         <Stat label="Late arrivals" value={d?.lateArrivals ?? "—"} />
+        <Stat label="Exceptions" value={d?.locationExceptions ?? "—"} />
+        <Stat label="On leave" value={d?.onLeaveToday ?? "—"} />
+        <Link to="/admin/approvals" className="block h-full">
+          <Stat label="Pending approvals" value={d?.pendingApprovals ?? "—"} />
+        </Link>
       </div>
 
       <h2 className="mt-8 font-display text-xl font-semibold">Active sessions</h2>
@@ -59,11 +70,21 @@ function AdminHome() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number | string }) {
+function Stat({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: number | string;
+  accent?: boolean;
+}) {
   return (
-    <Card className="p-4">
+    <Card className="h-full p-4">
       <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-1 font-display text-3xl tabular-nums">{value}</p>
+      <p className={`mt-1 font-display text-3xl tabular-nums ${accent ? "text-primary" : ""}`}>
+        {value}
+      </p>
     </Card>
   );
 }

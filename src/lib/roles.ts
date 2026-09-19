@@ -26,6 +26,14 @@ export function canCorrectAttendance(role: Role): boolean {
   return isStaff(role);
 }
 
+export function canApproveRequests(role: Role): boolean {
+  return isStaff(role);
+}
+
+export function canEditPolicy(role: Role): boolean {
+  return isAdmin(role);
+}
+
 export function canViewReports(role: Role): boolean {
   return isStaff(role);
 }
